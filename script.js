@@ -100,15 +100,8 @@ function startScanner() {
         disableFlip: false
     };
 
-    // Forçar uma resolução mais alta para evitar desfoque
-    const cameraConfig = { 
-        facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-    };
-
     html5QrCode.start(
-        cameraConfig, // Câmera traseira com foco e alta resolução
+        { facingMode: "environment" }, // Câmera traseira (fallback seguro)
         config,
         handleScanSuccess,
         (errorMessage) => {
