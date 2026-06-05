@@ -14,7 +14,17 @@ let lastScannedTime = 0;
 
 // Initialize the scanner
 function initScanner() {
-    html5QrCode = new Html5Qrcode("reader");
+    // Focar em códigos de barras de produtos (EAN/UPC) melhora a precisão e velocidade
+    html5QrCode = new Html5Qrcode("reader", {
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39
+        ]
+    });
 }
 
 function renderList() {
@@ -80,15 +90,25 @@ function handleScanSuccess(decodedText, decodedResult) {
 function startScanner() {
     if (!html5QrCode) initScanner();
 
+    // Redimensionar qrbox dependendo do tamanho da tela
+    const boxWidth = window.innerWidth > 400 ? 300 : 250;
+    
     const config = { 
-        fps: 10, 
-        qrbox: { width: 250, height: 150 },
-        aspectRatio: 1.333334,
+        fps: 15, // Mais frames por segundo = leitura mais rápida
+        qrbox: { width: boxWidth, height: 100 }, // Caixa retangular, ideal para EAN
+        aspectRatio: 1.0,
         disableFlip: false
     };
 
+    // Forçar uma resolução mais alta para evitar desfoque
+    const cameraConfig = { 
+        facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+    };
+
     html5QrCode.start(
-        { facingMode: "environment" }, // Rear camera
+        cameraConfig, // Câmera traseira com foco e alta resolução
         config,
         handleScanSuccess,
         (errorMessage) => {
