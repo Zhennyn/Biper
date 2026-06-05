@@ -5,6 +5,8 @@ const btnClear = document.getElementById('btn-clear');
 const listContainer = document.getElementById('scanned-list');
 const scanCountEl = document.getElementById('scan-count');
 const scannerOverlay = document.querySelector('.scanner-overlay');
+const btnNative = document.getElementById('btn-native');
+const nativeCameraInput = document.getElementById('native-camera-input');
 
 let html5QrCode;
 let scannedItems = [];
@@ -175,6 +177,37 @@ function loadFromStorage() {
         }
     }
 }
+
+// Native Camera Logic
+btnNative.addEventListener('click', () => {
+    nativeCameraInput.click();
+});
+
+nativeCameraInput.addEventListener('change', (e) => {
+    if (e.target.files.length === 0) return;
+    
+    const imageFile = e.target.files[0];
+    if (!html5QrCode) initScanner();
+    
+    // Parar o vídeo se estiver rodando
+    if (isScanning) {
+        stopScanner();
+    }
+
+    // Escanear a imagem estática
+    html5QrCode.scanFile(imageFile, true)
+        .then(decodedText => {
+            handleScanSuccess(decodedText);
+        })
+        .catch(err => {
+            console.error("File scan error:", err);
+            alert("Não foi possível ler o código nesta foto. Tente chegar mais perto do código.");
+        })
+        .finally(() => {
+            // Limpa o input para permitir bater outra foto do mesmo arquivo (se necessário)
+            e.target.value = "";
+        });
+});
 
 // Event Listeners
 btnStart.addEventListener('click', startScanner);
